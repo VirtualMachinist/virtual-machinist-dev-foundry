@@ -57,7 +57,7 @@ variable "vm_machine_type" {
 variable "vm_image" {
   description = "Boot disk image"
   type        = string
-  default     = "ubuntu-os-cloud/ubuntu-2204-lts"
+  default     = "centos-cloud/centos-stream-9"
 }
 
 # ====================

@@ -33,24 +33,42 @@ resource "google_compute_instance" "foundry_vm" {
 
   tags = ["allow-iap-ssh"]
 
-  metadata_startup_script = <<-EOF
-    #!/bin/bash
-    apt-get update
-    apt-get install -y docker.io docker-compose python3 python3-pip python3-venv git
-    usermod -aG docker $USER
-    
-    # Install cloud CLIs
-    pip3 install google-cloud-storage requests pandas
-    
-    # Install Terraform
-    wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-    apt-get update && apt-get install -y terraform
-    
-    # Install kubectl
-    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-  EOF
+metadata_startup_script = <<-EOF
+  #!/bin/bash
+  # CentOS/Fedora setup (dnf-based)
+  dnf update -y
+  dnf install -y dnf-plugins-core
+  
+  # Install Docker
+  dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  systemctl enable docker
+  systemctl start docker
+  usermod -aG docker $USER
+  
+  # Install Python
+  dnf install -y python3 python3-pip python3-virtualenv git
+  pip3 install google-cloud-storage requests pandas
+  
+  # Install Terraform
+  dnf install -y yum-utils
+  yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+  dnf install -y terraform
+  
+  # Install kubectl
+  cat <<KUBECTL_EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.29/rpm/repodata/repomd.xml.key
+KUBECTL_EOF
+  dnf install -y kubectl
+  
+  # Install gcloud CLI
+  dnf install -y google-cloud-cli
+EOF
 
   service_account {
     scopes = ["cloud-platform"]
