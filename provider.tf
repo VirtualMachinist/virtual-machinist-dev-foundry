@@ -9,7 +9,7 @@ terraform {
   }
 
   backend "gcs" {
-    bucket = "vm-foundry-tf-state"  # Create this bucket manually first
+    bucket = "fsvm-foundry-tf-state"  # Create this bucket manually first
     prefix = "terraform/state"
   }
 }
