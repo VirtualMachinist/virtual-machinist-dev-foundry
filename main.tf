@@ -2,7 +2,7 @@
 # VPC Network (via module)
 # ====================
 module "foundry_network" {
-  source = "github.com/VirtualMachinist/virtual-machinist-terraform-modules//modules/gcp_vpc?ref=v0.1.0"
+  source = "github.com/VirtualMachinist/virtual-machinist-terraform-modules//modules/gcp_vpc?ref=v0.2.0"
 
   project_id   = var.project_id
   vpc_name     = var.vpc_name
